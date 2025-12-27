@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ಉಗ್ರರಥ</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Kannada and Inter fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Sans+Kannada:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans Kannada', 'Inter', sans-serif;
+        }
+        
+        .kannada-text {
+            font-family: 'Noto Sans Kannada', sans-serif;
+        }
+        
+        /* Poster-inspired background with soft, textured look */
+        .poster-background {
+            background: linear-gradient(135deg, 
+                #e3f2fd 0%, 
+                #fff9c4 25%, 
+                #ffe082 50%, 
+                #e1bee7 75%, 
+                #c5e1a5 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        .poster-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 152, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 193, 7, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Decorative floral elements */
+        .floral-decoration {
+            position: absolute;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        .floral-1 {
+            top: 60%;
+            right: 5%;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #ff9800 0%, #ff6f00 50%, transparent 70%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            transform: rotate(45deg);
+        }
+        
+        .floral-2 {
+            bottom: 10%;
+            right: 10%;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ffc107 0%, #ff9800 50%, transparent 70%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            transform: rotate(-30deg);
+        }
+        
+        .floral-3 {
+            bottom: 15%;
+            left: 5%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ffeb3b 0%, #ffc107 50%, transparent 70%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            transform: rotate(60deg);
+        }
+        
+        /* Main title styling */
+        .main-title {
+            font-family: 'Noto Sans Kannada', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #5d4037;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 2px;
+        }
+        
+        @media (max-width: 640px) {
+            .main-title {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 195, 74, 0.6);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 195, 74, 0.8);
+        }
+        
+        /* Form container with background image */
+        /* To change the background image, replace 'form-background.jpg' with your image filename */
+        .form-container {
+            background-image: url('form-background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 1rem;
+            pointer-events: none;
+        }
+        
+        .form-container > * {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="poster-background min-h-screen p-3 sm:p-4 md:p-6 flex flex-col items-center justify-start">
+
+    <!-- Decorative Floral Elements -->
+    <div class="floral-decoration floral-1 hidden md:block"></div>
+    <div class="floral-decoration floral-2 hidden md:block"></div>
+    <div class="floral-decoration floral-3 hidden md:block"></div>
+    
+    <div class="w-full max-w-4xl form-container shadow-2xl rounded-2xl p-4 sm:p-6 lg:p-8 relative z-10 mb-4">
+        <!-- Logo in Top Left Corner -->
+        <div class="absolute top-3 sm:top-4 left-3 sm:left-4 lg:left-6">
+            <img src="poster.jpg" alt="ಉಗ್ರರಥ Logo" class="h-12 sm:h-16 md:h-20 w-auto object-contain drop-shadow-lg">
+        </div>
+        
+        <!-- Top Blessing Text -->
+        <div class="text-center mb-4 sm:mb-6 kannada-text pt-2 sm:pt-4 md:pt-6">
+            <p class="text-sm sm:text-base text-gray-700 mb-1">|| ಶ್ರೀ ಲಕ್ಷ್ಮಿ ವೆಂಕಟೇಶ್ವರ ಸ್ವಾಮಿ ಪ್ರಸನ್ನ ||</p>
+            <p class="text-xs sm:text-sm text-gray-600 mb-1">ಅವಧೂತಚಿಂತನಶ್ರೀ ಶ್ರೀ ಬಿಂಧುಮಾಧವ ಶರ್ಮಾರವರ</p>
+            <p class="text-xs sm:text-sm text-gray-600">ಆಶೀರ್ವಾದದೊಂದಿಗೆ...</p>
+        </div>
+        
+        <!-- Main Title -->
+        <div class="flex flex-col items-center mb-4 sm:mb-6">
+            <h1 class="main-title kannada-text text-center mb-2">ಉಗ್ರರಥ</h1>
+            <p class="text-xs sm:text-sm text-gray-600 kannada-text">ದಿನಾಂಕ: 04-01-2026</p>
+        </div>
+        
+        <p class="text-gray-600 text-center mb-4 sm:mb-6 text-sm sm:text-base">ದಯವಿಟ್ಟು ಕೆಳಗಿನ ಫಾರ್ಮ್ ಅನ್ನು ಭರ್ತಿ ಮಾಡಿ. ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆ ನಮಗೆ ಮುಖ್ಯವಾಗಿದೆ.</p>
+        
+        <!-- Custom Form -->
+        <form id="feedback-form" class="space-y-4 sm:space-y-6">
+            <!-- Name Field -->
+            <div>
+                <label for="name" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
+                    ಹೆಸರು <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required 
+                    placeholder="ನಿಮ್ಮ ಹೆಸರನ್ನು ನಮೂದಿಸಿ"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition duration-150">
+            </div>
+
+            <!-- Email Field -->
+            <div>
+                <label for="email" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
+                    ಇಮೇಲ್ <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    placeholder="ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition duration-150">
+            </div>
+
+            <!-- Phone Field -->
+            <div>
+                <label for="phone" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
+                    ಫೋನ್ ಸಂಖ್ಯೆ
+                </label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    placeholder="ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition duration-150">
+            </div>
+
+            <!-- Message/Feedback Field -->
+            <div>
+                <label for="message" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
+                    ಸಂದೇಶ / ಪ್ರತಿಕ್ರಿಯೆ <span class="text-red-500">*</span>
+                </label>
+                <textarea 
+                    id="message" 
+                    name="message" 
+                    required 
+                    rows="5"
+                    placeholder="ನಿಮ್ಮ ಸಂದೇಶ ಅಥವಾ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ನಮೂದಿಸಿ"
+                    class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition duration-150 resize-none"></textarea>
+            </div>
+
+            <!-- File Upload Field -->
+            <div>
+                <label for="file-upload" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
+                    ಚಿತ್ರ ಅಥವಾ ವೀಡಿಯೊ ಅಪ್ಲೋಡ್ ಮಾಡಿ (ಐಚ್ಛಿಕ)
+                </label>
+                <input 
+                    type="file" 
+                    id="file-upload" 
+                    name="file-upload" 
+                    accept="image/*,video/*"
+                    class="block w-full text-xs sm:text-sm text-gray-700
+                           file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
+                           file:rounded-lg file:border-0
+                           file:text-xs sm:file:text-sm file:font-semibold
+                           file:bg-emerald-50 file:text-emerald-700
+                           hover:file:bg-emerald-100 cursor-pointer
+                           border border-gray-300 rounded-lg p-2">
+                <p class="mt-2 text-xs text-gray-500">ಸ್ವೀಕರಿಸಲಾದ ಸ್ವರೂಪಗಳು: ಚಿತ್ರಗಳು (JPG, PNG, GIF) ಮತ್ತು ವೀಡಿಯೊಗಳು (MP4, MOV, AVI). ಗರಿಷ್ಠ ಫೈಲ್ ಗಾತ್ರ: 25MB</p>
+                <div id="file-preview" class="mt-3 hidden">
+                    <div class="relative inline-block">
+                        <img id="file-preview-image" class="max-w-full sm:max-w-xs max-h-48 rounded-lg border-2 border-gray-300" alt="Preview">
+                        <button type="button" id="remove-file" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="file-name" class="mt-2 text-xs sm:text-sm text-gray-600"></p>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+                type="submit" 
+                id="submit-button"
+                class="w-full flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 border border-transparent text-sm sm:text-base font-medium rounded-xl shadow-lg text-white bg-emerald-500 hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="submit-text" class="kannada-text">ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ</span>
+                <svg id="submit-spinner" class="hidden animate-spin -ml-1 mr-3 h-4 w-4 sm:h-5 sm:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+
+            <!-- Success/Error Messages -->
+            <div id="form-message" class="hidden mt-4 p-3 sm:p-4 rounded-lg text-sm sm:text-base"></div>
+        </form>
+        
+        <!-- Contact Information Footer -->
+        <div class="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+            <div class="text-center text-xs sm:text-sm text-gray-700 kannada-text space-y-1">
+                <p class="font-medium mb-2">ಇವರಿಂದ....</p>
+                <p>ಸಮರ್ಥ ಮಿತ್ರ, ಸ್ಫೂರ್ತಿ ಸಮರ್ಥ</p>
+                <p>ಹಾಗು ಕೈವಲ್ಯ ಮಿತ್ರ</p>
+                <p class="mt-2">'ಸಾರಂಗ' ವಿನಾಯಕ ನಗರ, ತಿಪಟೂರು</p>
+                <p class="mt-2 text-emerald-600 font-medium">9845578415, 8147292442</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
+        // See google-apps-script-code.gs file for setup instructions
+        // Get this from: Google Apps Script > Deploy > Manage deployments > Copy URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfe4594F9zensMd7h03-EJiO7y3Qqc1M1ry-HT9oPh1FDYEIEOEqdlbT6Gl8PX5EV3Eg/exec';
+        
+        // Debug mode - set to true to see detailed logs in console (F12)
+        const DEBUG_MODE = true;
+
+        const form = document.getElementById('feedback-form');
+        const submitButton = document.getElementById('submit-button');
+        const submitText = document.getElementById('submit-text');
+        const submitSpinner = document.getElementById('submit-spinner');
+        const formMessage = document.getElementById('form-message');
+        const fileUpload = document.getElementById('file-upload');
+        const filePreview = document.getElementById('file-preview');
+        const filePreviewImage = document.getElementById('file-preview-image');
+        const fileName = document.getElementById('file-name');
+        const removeFileBtn = document.getElementById('remove-file');
+
+        // Handle file preview
+        fileUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file size (25MB limit)
+                const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+                if (file.size > maxSize) {
+                    showMessage('ಫೈಲ್ ಗಾತ್ರ 25MB ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.', 'error');
+                    fileUpload.value = '';
+                    return;
+                }
+
+                fileName.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                
+                // Show preview for images
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        filePreviewImage.src = e.target.result;
+                        filePreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('video/')) {
+                    // For videos, just show the filename
+                    filePreviewImage.src = ''; // Hide image preview for videos
+                    filePreview.classList.remove('hidden');
+                    filePreviewImage.style.display = 'none';
+                }
+            }
+        });
+
+        // Handle file removal
+        removeFileBtn.addEventListener('click', () => {
+            fileUpload.value = '';
+            filePreview.classList.add('hidden');
+            filePreviewImage.style.display = '';
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Validate Google Script URL
+            if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                showMessage('ದಯವಿಟ್ಟು Google Apps Script URL ಅನ್ನು ಕonfigure ಮಾಡಿ. ಸೆಟಪ್ ಸೂಚನೆಗಳನ್ನು ನೋಡಿ.', 'error');
+                return;
+            }
+
+            // Disable submit button
+            submitButton.disabled = true;
+            submitText.textContent = 'ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ...';
+            submitSpinner.classList.remove('hidden');
+            formMessage.classList.add('hidden');
+
+            try {
+                // Prepare form data
+                const formDataObj = new FormData(form);
+                const data = {
+                    timestamp: new Date().toISOString(),
+                    name: formDataObj.get('name'),
+                    email: formDataObj.get('email'),
+                    phone: formDataObj.get('phone'),
+                    message: formDataObj.get('message')
+                };
+
+                // Handle file upload if present
+                const fileInput = fileUpload.files[0];
+                if (fileInput) {
+                    // Convert file to base64
+                    const reader = new FileReader();
+                    reader.onloadend = async function() {
+                        const base64String = reader.result.split(',')[1]; // Remove data URL prefix
+                        data.fileName = fileInput.name;
+                        data.fileType = fileInput.type;
+                        data.fileSize = fileInput.size;
+                        data.fileData = base64String;
+
+                        // Submit to Google Apps Script
+                        await submitData(data);
+                    };
+                    reader.onerror = () => {
+                        showMessage('ಫೈಲ್ ಓದುವಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', 'error');
+                        submitButton.disabled = false;
+                        submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
+                        submitSpinner.classList.add('hidden');
+                    };
+                    reader.readAsDataURL(fileInput);
+                } else {
+                    // No file, submit directly
+                    await submitData(data);
+                }
+
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showMessage('ಫಾರ್ಮ್ ಸಲ್ಲಿಸುವಲ್ಲಿ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', 'error');
+                submitButton.disabled = false;
+                submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
+                submitSpinner.classList.add('hidden');
+            }
+
+            async function submitData(data) {
+                try {
+                    if (DEBUG_MODE) {
+                        console.log('=== Form Submission Debug ===');
+                        console.log('URL:', GOOGLE_SCRIPT_URL);
+                        console.log('Data being sent:', { 
+                            name: data.name, 
+                            email: data.email, 
+                            phone: data.phone,
+                            message: data.message,
+                            hasFile: !!data.fileData,
+                            fileName: data.fileName || 'none',
+                            fileSize: data.fileSize || 0
+                        });
+                    }
+                    
+                    // Validate URL is configured
+                    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT')) {
+                        throw new Error('Google Apps Script URL ಅನ್ನು configure ಮಾಡಲಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು index.html ನಲ್ಲಿ GOOGLE_SCRIPT_URL ಅನ್ನು ನವೀಕರಿಸಿ');
+                    }
+                    
+                    // Convert data to URL-encoded format (more reliable with Google Apps Script)
+                    const formData = new URLSearchParams();
+                    formData.append('timestamp', data.timestamp || new Date().toISOString());
+                    formData.append('name', data.name || '');
+                    formData.append('email', data.email || '');
+                    formData.append('phone', data.phone || '');
+                    formData.append('message', data.message || '');
+                    
+                    // Add file data if present (for large files, we'll send as JSON separately)
+                    if (data.fileData && data.fileName) {
+                        // If file is small (< 1MB), send as URL param, otherwise warn
+                        if (data.fileSize < 1024 * 1024) {
+                            formData.append('fileName', data.fileName);
+                            formData.append('fileType', data.fileType || '');
+                            formData.append('fileData', data.fileData);
+                        } else {
+                            console.warn('File is too large for URL encoding. Using JSON method.');
+                            // Fall back to JSON for large files
+                            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data)
+                            });
+                            setTimeout(() => {
+                                showMessage('ಫಾರ್ಮ್ ಸಲ್ಲಿಸಲಾಗಿದೆ! ✅ ಪರಿಶೀಲಿಸಲು ನಿಮ್ಮ Google Sheet ಅನ್ನು ಪರಿಶೀಲಿಸಿ.', 'success');
+                                document.getElementById('feedback-form').reset();
+                                filePreview.classList.add('hidden');
+                                filePreviewImage.style.display = '';
+                                submitButton.disabled = false;
+                                submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
+                                submitSpinner.classList.add('hidden');
+                            }, 1000);
+                            return;
+                        }
+                    }
+                    
+                    // Submit using URL-encoded format (works better with Google Apps Script)
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData.toString()
+                    });
+                    
+                    if (DEBUG_MODE) {
+                        console.log('Request sent using URL-encoded format');
+                        console.log('Please check:');
+                        console.log('1. Google Apps Script logs (View > Logs)');
+                        console.log('2. Google Sheet for new rows');
+                        console.log('3. Google Drive for uploaded files');
+                    }
+                    
+                    // Wait a moment then show success message
+                    setTimeout(() => {
+                        showMessage('ಫಾರ್ಮ್ ಸಲ್ಲಿಸಲಾಗಿದೆ! ✅ ಡೇಟಾ ಉಳಿಸಲಾಗಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಲು ನಿಮ್ಮ Google Sheet ಅನ್ನು ಪರಿಶೀಲಿಸಿ.', 'success');
+                        document.getElementById('feedback-form').reset();
+                        filePreview.classList.add('hidden');
+                        filePreviewImage.style.display = '';
+                        submitButton.disabled = false;
+                        submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
+                        submitSpinner.classList.add('hidden');
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('=== Form Submission Error ===');
+                    console.error('Error details:', error);
+                    console.error('Error message:', error.message);
+                    console.error('Stack trace:', error.stack);
+                    
+                    let errorMsg = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸುವಲ್ಲಿ ದೋಷ. ';
+                    if (error.message.includes('configure')) {
+                        errorMsg += error.message;
+                    } else {
+                        errorMsg += 'ದಯವಿಟ್ಟು ಪರಿಶೀಲಿಸಿ:\n';
+                        errorMsg += '1. ದೋಷಗಳಿಗಾಗಿ ಬ್ರೌಸರ್ ಕನ್ಸೋಲ್ (F12)\n';
+                        errorMsg += '2. Google Apps Script ಲಾಗ್ಗಳು (View > Logs)\n';
+                        errorMsg += '3. SPREADSHEET_ID configure ಮಾಡಲಾಗಿದೆಯೇ\n';
+                        errorMsg += '4. ವಿವರವಾದ ಸಹಾಯಕ್ಕಾಗಿ TROUBLESHOOTING.md ನೋಡಿ';
+                    }
+                    
+                    showMessage(errorMsg, 'error');
+                    submitButton.disabled = false;
+                    submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
+                    submitSpinner.classList.add('hidden');
+                }
+            }
+        });
+
+        function showMessage(message, type) {
+            formMessage.textContent = message;
+            formMessage.classList.remove('hidden');
+            
+            if (type === 'success') {
+                formMessage.className = 'mt-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800';
+            } else {
+                formMessage.className = 'mt-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800';
+            }
+        }
+    </script>
+</body>
+</html>
+
