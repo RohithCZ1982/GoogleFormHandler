@@ -1,0 +1,81 @@
+/************ CONFIG ************/
+const SPREADSHEET_ID = 'PASTE_YOUR_SHEET_ID_HERE';
+const DRIVE_FOLDER_ID = 'PASTE_YOUR_DRIVE_FOLDER_ID_HERE';
+
+/************ ROUTER ************/
+function doPost(e) {
+  try {
+    const action = e.parameter.action;
+
+    if (action === 'upload') return uploadFile(e);
+    if (action === 'submit') return submitForm(e);
+    if (action === 'delete') return deleteFile(e);
+
+    return json({ success: false, error: 'Invalid action' });
+  } catch (err) {
+    return json({ success: false, error: err.message });
+  }
+}
+
+/************ UPLOAD FILE ************/
+function uploadFile(e) {
+  if (!e.parameter.file) throw new Error('No file received');
+
+  const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+
+  const blob = Utilities.newBlob(
+    Utilities.base64Decode(e.parameter.file),
+    e.parameter.mimeType,
+    e.parameter.fileName
+  );
+
+  const file = folder.createFile(blob);
+  file.setSharing(
+    DriveApp.Access.ANYONE_WITH_LINK,
+    DriveApp.Permission.VIEW
+  );
+
+  return json({
+    success: true,
+    fileId: file.getId(),
+    fileName: file.getName(),
+    fileUrl: file.getUrl()
+  });
+}
+
+/************ DELETE FILE ************/
+function deleteFile(e) {
+  const fileId = e.parameter.fileId;
+  if (!fileId) throw new Error('No fileId');
+
+  DriveApp.getFileById(fileId).setTrashed(true);
+  return json({ success: true });
+}
+
+/************ SUBMIT FORM ************/
+function submitForm(e) {
+  const sheet = SpreadsheetApp
+    .openById(SPREADSHEET_ID)
+    .getActiveSheet();
+
+  const data = JSON.parse(e.postData.contents);
+
+  sheet.appendRow([
+    new Date(),
+    data.name || '',
+    data.email || '',
+    data.phone || '',
+    data.message || '',
+    data.fileName || '',
+    data.fileUrl || ''
+  ]);
+
+  return json({ success: true });
+}
+
+/************ HELPER ************/
+function json(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
