@@ -196,7 +196,7 @@
             <!-- Message/Feedback Field -->
             <div>
                 <label for="message" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
-                    ಸಂದೇಶ / ಪ್ರತಿಕ್ರಿಯೆ / Message / Feedback <span class="text-red-500">*</span>
+                    ಸಂದೇಶ / Message  <span class="text-red-500">*</span>
                 </label>
                 <textarea 
                     id="message" 
@@ -207,17 +207,17 @@
                     class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition duration-150 resize-none"></textarea>
             </div>
 
-            <!-- File Upload Field -->
+            <!-- Photo Upload Field -->
             <div>
-                <label for="file-upload" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
-                    Phots/Videos Upload (Optional)
+                <label for="photo-upload" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
+                    Photo Upload (Optional)
                 </label>
                 <input 
                     type="file" 
-                    id="file-upload" 
-                    name="file-upload" 
-                    accept="image/*,video/*"
-                    capture
+                    id="photo-upload" 
+                    name="photo-upload" 
+                    accept="image/*"
+                    capture="environment"
                     class="block w-full text-xs sm:text-sm text-gray-700
                            file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
                            file:rounded-lg file:border-0
@@ -225,17 +225,49 @@
                            file:bg-emerald-50 file:text-emerald-700
                            hover:file:bg-emerald-100 cursor-pointer
                            border border-gray-300 rounded-lg p-2">
-                <p class="mt-2 text-xs text-gray-500">Supported formats: Images (JPG, PNG, GIF) and Videos (MP4, MOV, AVI). Maximum file size: 25MB</p>
-                <div id="file-preview" class="mt-3 hidden">
+                <p class="mt-2 text-xs text-gray-500">Supported formats: JPG, PNG, GIF. Maximum file size: 25MB</p>
+                <div id="photo-preview" class="mt-3 hidden">
                     <div class="relative inline-block">
-                        <img id="file-preview-image" class="max-w-full sm:max-w-xs max-h-48 rounded-lg border-2 border-gray-300" alt="Preview">
-                        <button type="button" id="remove-file" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
+                        <img id="photo-preview-image" class="max-w-full sm:max-w-xs max-h-48 rounded-lg border-2 border-gray-300" alt="Photo Preview">
+                        <button type="button" id="remove-photo" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
-                    <p id="file-name" class="mt-2 text-xs sm:text-sm text-gray-600"></p>
+                    <p id="photo-name" class="mt-2 text-xs sm:text-sm text-gray-600"></p>
+                </div>
+            </div>
+
+            <!-- Video Upload Field -->
+            <div>
+                <label for="video-upload" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
+                    Video Upload (Optional)
+                </label>
+                <input 
+                    type="file" 
+                    id="video-upload" 
+                    name="video-upload" 
+                    accept="video/*"
+                    capture="environment"
+                    class="block w-full text-xs sm:text-sm text-gray-700
+                           file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
+                           file:rounded-lg file:border-0
+                           file:text-xs sm:file:text-sm file:font-semibold
+                           file:bg-emerald-50 file:text-emerald-700
+                           hover:file:bg-emerald-100 cursor-pointer
+                           border border-gray-300 rounded-lg p-2">
+                <p class="mt-2 text-xs text-gray-500">Supported formats: MP4, MOV, AVI. Maximum file size: 25MB</p>
+                <div id="video-preview" class="mt-3 hidden">
+                    <div class="relative inline-block">
+                        <video id="video-preview-player" class="max-w-full sm:max-w-xs max-h-48 rounded-lg border-2 border-gray-300" controls style="display: none;"></video>
+                        <button type="button" id="remove-video" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600" style="display: none;">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="video-name" class="mt-2 text-xs sm:text-sm text-gray-600"></p>
                 </div>
             </div>
 
@@ -263,7 +295,7 @@
                 <p>ಹಾಗು ಕೈವಲ್ಯ ಮಿತ್ರ</p>
                 <p class="mt-2">'ಸಾರಂಗ' ವಿನಾಯಕ ನಗರ, ತಿಪಟೂರು</p>
                 <p class="mt-2 text-emerald-600 font-medium">9845578415, 8147292442</p>
-                <p class="mt-3 text-gray-400 text-xs">Version 1.0.4</p>
+                <p class="mt-3 text-gray-400 text-xs">Version 1.0.5</p>
             </div>
         </div>
     </div>
@@ -290,48 +322,116 @@
         const submitText = document.getElementById('submit-text');
         const submitSpinner = document.getElementById('submit-spinner');
         const formMessage = document.getElementById('form-message');
-        const fileUpload = document.getElementById('file-upload');
-        const filePreview = document.getElementById('file-preview');
-        const filePreviewImage = document.getElementById('file-preview-image');
-        const fileName = document.getElementById('file-name');
-        const removeFileBtn = document.getElementById('remove-file');
+        
+        // Photo upload elements
+        const photoUpload = document.getElementById('photo-upload');
+        const photoPreview = document.getElementById('photo-preview');
+        const photoPreviewImage = document.getElementById('photo-preview-image');
+        const photoName = document.getElementById('photo-name');
+        const removePhotoBtn = document.getElementById('remove-photo');
+        
+        // Video upload elements
+        const videoUpload = document.getElementById('video-upload');
+        const videoPreview = document.getElementById('video-preview');
+        const videoPreviewPlayer = document.getElementById('video-preview-player');
+        const videoName = document.getElementById('video-name');
+        const removeVideoBtn = document.getElementById('remove-video');
 
-        // Handle file preview
-        fileUpload.addEventListener('change', (e) => {
+        // Handle photo preview
+        photoUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                // Clear video if photo is selected
+                if (videoUpload.files.length > 0) {
+                    videoUpload.value = '';
+                    if (videoPreviewPlayer.src) {
+                        URL.revokeObjectURL(videoPreviewPlayer.src);
+                    }
+                    videoPreviewPlayer.src = '';
+                    videoPreviewPlayer.style.display = 'none';
+                    removeVideoBtn.style.display = 'none';
+                    videoPreview.classList.add('hidden');
+                }
+                
                 // Validate file size (25MB limit)
                 const maxSize = 25 * 1024 * 1024; // 25MB in bytes
                 if (file.size > maxSize) {
-                    showMessage('ಫೈಲ್ ಗಾತ್ರ 25MB ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.', 'error');
-                    fileUpload.value = '';
+                    showMessage('ಫೋಟೋ ಗಾತ್ರ 25MB ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.', 'error');
+                    photoUpload.value = '';
                     return;
                 }
 
-                fileName.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                // Validate it's an image
+                if (!file.type.startsWith('image/')) {
+                    showMessage('ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಚಿತ್ರ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.', 'error');
+                    photoUpload.value = '';
+                    return;
+                }
+
+                photoName.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
                 
                 // Show preview for images
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        filePreviewImage.src = e.target.result;
-                        filePreview.classList.remove('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                } else if (file.type.startsWith('video/')) {
-                    // For videos, just show the filename
-                    filePreviewImage.src = ''; // Hide image preview for videos
-                    filePreview.classList.remove('hidden');
-                    filePreviewImage.style.display = 'none';
-                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    photoPreviewImage.src = e.target.result;
+                    photoPreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
             }
         });
 
-        // Handle file removal
-        removeFileBtn.addEventListener('click', () => {
-            fileUpload.value = '';
-            filePreview.classList.add('hidden');
-            filePreviewImage.style.display = '';
+        // Handle video preview
+        videoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Clear photo if video is selected
+                if (photoUpload.files.length > 0) {
+                    photoUpload.value = '';
+                    photoPreview.classList.add('hidden');
+                }
+                
+                // Validate file size (25MB limit)
+                const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+                if (file.size > maxSize) {
+                    showMessage('ವೀಡಿಯೊ ಗಾತ್ರ 25MB ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.', 'error');
+                    videoUpload.value = '';
+                    return;
+                }
+
+                // Validate it's a video
+                if (!file.type.startsWith('video/')) {
+                    showMessage('ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ವೀಡಿಯೊ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.', 'error');
+                    videoUpload.value = '';
+                    return;
+                }
+
+                videoName.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                
+                // Show preview for videos
+                const url = URL.createObjectURL(file);
+                videoPreviewPlayer.src = url;
+                videoPreviewPlayer.style.display = 'block';
+                removeVideoBtn.style.display = 'block';
+                videoPreview.classList.remove('hidden');
+            }
+        });
+
+        // Handle photo removal
+        removePhotoBtn.addEventListener('click', () => {
+            photoUpload.value = '';
+            photoPreview.classList.add('hidden');
+        });
+
+        // Handle video removal
+        removeVideoBtn.addEventListener('click', () => {
+            if (videoPreviewPlayer.src) {
+                URL.revokeObjectURL(videoPreviewPlayer.src);
+            }
+            videoUpload.value = '';
+            videoPreviewPlayer.src = '';
+            videoPreviewPlayer.style.display = 'none';
+            removeVideoBtn.style.display = 'none';
+            videoPreview.classList.add('hidden');
         });
 
         form.addEventListener('submit', async (e) => {
@@ -358,8 +458,11 @@
                     message: formDataObj.get('message')
                 };
 
-                // Handle file upload if present
-                const fileInput = fileUpload.files[0];
+                // Handle file upload if present (either photo or video, but only one at a time)
+                const photoInput = photoUpload.files[0];
+                const videoInput = videoUpload.files[0];
+                const fileInput = photoInput || videoInput; // Get whichever is selected
+                
                 if (fileInput) {
                     // Convert file to base64
                     const reader = new FileReader();
@@ -479,8 +582,16 @@
                     setTimeout(() => {
                         showMessage('ಫಾರ್ಮ್ ಸಲ್ಲಿಸಲಾಗಿದೆ! ✅ ', 'success');
                         document.getElementById('feedback-form').reset();
-                        filePreview.classList.add('hidden');
-                        filePreviewImage.style.display = '';
+                        // Clear photo preview
+                        photoPreview.classList.add('hidden');
+                        // Clear video preview
+                        if (videoPreviewPlayer.src) {
+                            URL.revokeObjectURL(videoPreviewPlayer.src);
+                        }
+                        videoPreviewPlayer.src = '';
+                        videoPreviewPlayer.style.display = 'none';
+                        removeVideoBtn.style.display = 'none';
+                        videoPreview.classList.add('hidden');
                         submitButton.disabled = false;
                         submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
                         submitSpinner.classList.add('hidden');
