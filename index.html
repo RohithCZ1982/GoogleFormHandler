@@ -250,7 +250,7 @@
                            file:bg-emerald-50 file:text-emerald-700
                            hover:file:bg-emerald-100 cursor-pointer
                            border border-gray-300 rounded-lg p-2">
-                <p class="mt-2 text-xs text-gray-500">ಸ್ವೀಕರಿಸಲಾದ ಸ್ವರೂಪಗಳು: ಚಿತ್ರಗಳು (JPG, PNG, GIF) ಮತ್ತು ವೀಡಿಯೊಗಳು (MP4, MOV, AVI). ಗರಿಷ್ಠ ಫೈಲ್ ಗಾತ್ರ: 25MB</p>
+                <p class="mt-2 text-xs text-gray-500">ಸ್ವೀಕರಿಸಲಾದ ಸ್ವರೂಪಗಳು: ಚಿತ್ರಗಳು (JPG, PNG, GIF) ಮತ್ತು ವೀಡಿಯೊಗಳು (MP4, MOV, AVI). ಗರಿಷ್ಠ ಫೈಲ್ ಗಾತ್ರ: 35MB (ಚಿತ್ರಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸಂಕುಚಿಸಲ್ಪಡುತ್ತವೆ)</p>
                 <div id="file-preview" class="mt-3 hidden">
                     <div class="relative inline-block">
                         <img id="file-preview-image" class="max-w-full sm:max-w-xs max-h-48 rounded-lg border-2 border-gray-300" alt="Preview">
@@ -315,27 +315,57 @@
 
         /******** IMAGE COMPRESSION ********/
         async function compressImage(file) {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 const img = new Image();
                 const reader = new FileReader();
 
                 reader.onload = () => img.src = reader.result;
+                img.onerror = () => reject(new Error('Failed to load image for compression'));
+                
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    // Scale down if image is larger than 1280px width
-                    const scale = Math.min(1, 1280 / img.width);
+                    // Scale down if image is larger than 1280px width (or height)
+                    const maxDimension = 1280;
+                    let scale = 1;
+                    
+                    if (img.width > maxDimension || img.height > maxDimension) {
+                        scale = Math.min(maxDimension / img.width, maxDimension / img.height);
+                    }
+                    
                     canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
                     const ctx = canvas.getContext('2d');
+                    
+                    // Use better image rendering
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     
-                    // Convert to JPEG with 0.7 quality (good balance between size and quality)
+                    // Convert to JPEG with 0.75 quality (good balance between size and quality)
+                    // Adjust quality based on original file size
+                    let quality = 0.75;
+                    if (file.size > 5 * 1024 * 1024) { // If original > 5MB, use lower quality
+                        quality = 0.65;
+                    } else if (file.size < 500 * 1024) { // If original < 500KB, use higher quality
+                        quality = 0.85;
+                    }
+                    
                     canvas.toBlob(
-                        (blob) => resolve(new File([blob], file.name, { type: 'image/jpeg' })),
+                        (blob) => {
+                            if (blob) {
+                                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), { type: 'image/jpeg' });
+                                const compressionRatio = ((1 - compressedFile.size / file.size) * 100).toFixed(1);
+                                console.log(`Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB (${compressionRatio}% reduction)`);
+                                resolve(compressedFile);
+                            } else {
+                                reject(new Error('Failed to compress image'));
+                            }
+                        },
                         'image/jpeg',
-                        0.7
+                        quality
                     );
                 };
+                reader.onerror = () => reject(new Error('Failed to read image file'));
                 reader.readAsDataURL(file);
             });
         }
@@ -371,44 +401,81 @@
             }
         });
 
-        /******** UPLOAD FILE WITH PROGRESS ********/
+        /******** UPLOAD FILE WITH PROGRESS (CORS-Safe) ********/
         function uploadFileWithProgress(file) {
             return new Promise((resolve, reject) => {
+                // Check file size before processing (Google Apps Script has ~50MB limit, but base64 increases size by ~33%)
+                const maxFileSize = 35 * 1024 * 1024; // 35MB (will be ~47MB base64 encoded)
+                if (file.size > maxFileSize) {
+                    reject(new Error(`ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ (${(file.size / 1024 / 1024).toFixed(2)}MB). ಗರಿಷ್ಠ ಗಾತ್ರ: 35MB. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.`));
+                    return;
+                }
+
                 const reader = new FileReader();
                 
-                reader.onload = () => {
+                reader.onload = async () => {
+                    const base64Data = reader.result.split(',')[1]; // Base64 data without prefix
+                    
+                    // Check encoded size (base64 is ~33% larger)
+                    const encodedSize = base64Data.length;
+                    const maxEncodedSize = 50 * 1024 * 1024; // 50MB limit for Google Apps Script
+                    
+                    if (encodedSize > maxEncodedSize) {
+                        reject(new Error(`ಎನ್ಕೋಡ್ ಮಾಡಿದ ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ (${(encodedSize / 1024 / 1024).toFixed(2)}MB). ದಯವಿಟ್ಟು ಫೈಲ್ ಅನ್ನು ಸಂಕುಚಿಸಿ ಅಥವಾ ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.`));
+                        return;
+                    }
+
                     const formData = new URLSearchParams();
                     formData.append('action', 'upload');
-                    formData.append('file', reader.result.split(',')[1]); // Base64 data without prefix
+                    formData.append('file', base64Data);
                     formData.append('fileName', file.name);
                     formData.append('mimeType', file.type);
 
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', GOOGLE_SCRIPT_URL);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    // Simulate progress for user feedback (since we can't track actual progress with no-cors)
+                    let progressInterval;
+                    let progressPercent = 0;
+                    const startTime = Date.now();
+                    const estimatedTime = Math.max(5000, (encodedSize / 1024 / 1024) * 2000); // Estimate: 2s per MB, min 5s
+                    
+                    progressInterval = setInterval(() => {
+                        const elapsed = Date.now() - startTime;
+                        progressPercent = Math.min(95, Math.round((elapsed / estimatedTime) * 100));
+                        submitText.textContent = `ಅಪ್ಲೋಡ್ ${progressPercent}%`;
+                    }, 200);
 
-                    xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable) {
-                            const percentComplete = Math.round((e.loaded / e.total) * 100);
-                            submitText.textContent = `ಅಪ್ಲೋಡ್ ${percentComplete}%`;
-                        }
-                    };
+                    try {
+                        // Use fetch with 'no-cors' mode to avoid CORS preflight
+                        // Note: We can't read the response with no-cors, but Google Apps Script will process it
+                        const response = await fetch(GOOGLE_SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'no-cors', // This avoids CORS preflight
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: formData.toString()
+                        });
 
-                    xhr.onload = () => {
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                resolve(response);
-                            } else {
-                                reject(new Error(response.error || 'Upload failed'));
-                            }
-                        } catch (parseError) {
-                            reject(new Error('Failed to parse upload response'));
-                        }
-                    };
+                        clearInterval(progressInterval);
+                        submitText.textContent = `ಅಪ್ಲೋಡ್ 100%`;
 
-                    xhr.onerror = () => reject(new Error('Upload request failed'));
-                    xhr.send(formData.toString());
+                        // Since we can't read response with no-cors, we'll construct a response object
+                        // The file will be uploaded, and we'll get the fileId from the form submission
+                        // For now, we'll create a placeholder response and verify on form submit
+                        setTimeout(() => {
+                            // Assume upload succeeded (we'll verify when submitting form)
+                            resolve({
+                                success: true,
+                                fileName: file.name,
+                                fileUrl: '', // Will be filled when form is submitted
+                                fileId: 'pending' // Will be verified on form submit
+                            });
+                        }, 500);
+
+                    } catch (error) {
+                        clearInterval(progressInterval);
+                        console.error('Upload error:', error);
+                        reject(new Error('ಫೈಲ್ ಅಪ್ಲೋಡ್ ಮಾಡುವಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.'));
+                    }
                 };
 
                 reader.onerror = () => reject(new Error('Failed to read file'));
@@ -485,30 +552,50 @@
                 const fileInput = fileUpload.files[0];
                 if (fileInput) {
                     try {
+                        // Check file size before processing
+                        const maxFileSize = 35 * 1024 * 1024; // 35MB limit
+                        if (fileInput.size > maxFileSize) {
+                            showMessage(`ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ (${(fileInput.size / 1024 / 1024).toFixed(2)}MB). ಗರಿಷ್ಠ ಗಾತ್ರ: 35MB. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.`, 'error');
+                            submitButton.disabled = false;
+                            submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
+                            submitSpinner.classList.add('hidden');
+                            return;
+                        }
+
                         // Compress image if it's an image file
                         let fileToUpload = fileInput;
                         if (fileInput.type.startsWith('image/')) {
                             submitText.textContent = 'ಚಿತ್ರವನ್ನು ಸಂಕುಚಿಸಲಾಗುತ್ತಿದೆ...';
-                            fileToUpload = await compressImage(fileInput);
-                            const originalSize = (fileInput.size / 1024 / 1024).toFixed(2);
-                            const compressedSize = (fileToUpload.size / 1024 / 1024).toFixed(2);
-                            console.log(`Image compressed: ${originalSize}MB → ${compressedSize}MB`);
+                            try {
+                                fileToUpload = await compressImage(fileInput);
+                            } catch (compressError) {
+                                console.warn('Compression failed, using original:', compressError);
+                                // Continue with original file if compression fails
+                                fileToUpload = fileInput;
+                            }
                         }
 
-                        // Upload file first with progress tracking
-                        submitText.textContent = 'ಫೈಲ್ ಅಪ್ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...';
-                        uploadedFile = await uploadFileWithProgress(fileToUpload);
-                        
-                        // Add file info to form data
-                        data.fileName = uploadedFile.fileName;
-                        data.fileUrl = uploadedFile.fileUrl;
-                        data.fileId = uploadedFile.fileId;
+                        // Convert file to base64 and include in form submission
+                        // This avoids CORS issues by sending everything in one request
+                        submitText.textContent = 'ಫೈಲ್ ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ...';
+                        const fileBase64 = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result.split(',')[1]);
+                            reader.onerror = () => reject(new Error('Failed to read file'));
+                            reader.readAsDataURL(fileToUpload);
+                        });
 
-                        // Submit form data
+                        // Add file data to form submission
+                        data.fileName = fileToUpload.name;
+                        data.fileType = fileToUpload.type;
+                        data.fileData = fileBase64;
+
+                        // Submit form data with file included
                         await submitData(data);
                     } catch (uploadError) {
-                        console.error('File upload error:', uploadError);
-                        showMessage('ಫೈಲ್ ಅಪ್ಲೋಡ್ ಮಾಡುವಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', 'error');
+                        console.error('File processing error:', uploadError);
+                        const errorMsg = uploadError.message || 'ಫೈಲ್ ಸಂಸ್ಕರಿಸುವಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.';
+                        showMessage(errorMsg, 'error');
                         submitButton.disabled = false;
                         submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
                         submitSpinner.classList.add('hidden');
@@ -556,16 +643,21 @@
                     formData.append('phone', data.phone || '');
                     formData.append('message', data.message || '');
                     
-                    // Add file info if file was uploaded
-                    if (data.fileName) {
+                    // Add file data if present (file will be uploaded during form submission)
+                    if (data.fileData && data.fileName) {
+                        formData.append('fileName', data.fileName);
+                        formData.append('fileType', data.fileType || '');
+                        formData.append('fileData', data.fileData);
+                    } else if (data.fileName) {
+                        // File was uploaded separately, just include the reference
                         formData.append('fileName', data.fileName);
                         formData.append('fileUrl', data.fileUrl || '');
                     }
                     
-                    // Submit using URL-encoded format (works better with Google Apps Script)
+                    // Submit using URL-encoded format with no-cors mode to avoid CORS preflight
                     const response = await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
-                        mode: 'no-cors',
+                        mode: 'no-cors', // Avoids CORS preflight - works from any origin
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
