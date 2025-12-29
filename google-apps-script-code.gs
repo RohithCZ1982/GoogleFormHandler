@@ -34,8 +34,9 @@ const DRIVE_FOLDER_NAME = 'Birthday';
  * Handle POST request from the form
  */
 function doPost(e) {
-  // Start logging immediately
-  console.log('=== doPost called ===');
+  // Start logging immediately - these logs should be visible
+  console.log('=== doPost STARTED ===');
+  console.log('Timestamp:', new Date().toISOString());
   console.log('Event exists:', !!e);
   console.log('SPREADSHEET_ID:', SPREADSHEET_ID);
   
@@ -43,21 +44,41 @@ function doPost(e) {
     // Check if event parameter exists
     if (!e) {
       console.error('ERROR: Event parameter is missing');
-      throw new Error('Event parameter is missing. This function should be called as a web app.');
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'Event parameter is missing'
+      })).setMimeType(ContentService.MimeType.JSON);
     }
+    
+    // Log what we received
+    console.log('Has postData:', !!e.postData);
+    console.log('postData type:', e.postData ? e.postData.type : 'N/A');
+    console.log('Has parameters:', !!e.parameter);
+    console.log('Parameter keys:', Object.keys(e.parameter || {}));
     
     // Check if SPREADSHEET_ID is configured
     if (SPREADSHEET_ID === 'YOUR_SPREADSHEET_ID_HERE' || !SPREADSHEET_ID || SPREADSHEET_ID.trim() === '') {
       console.error('ERROR: SPREADSHEET_ID is not configured');
-      throw new Error('SPREADSHEET_ID is not configured. Please update it in the script.');
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'SPREADSHEET_ID is not configured'
+      })).setMimeType(ContentService.MimeType.JSON);
     }
     
     // Get form data - prioritize URL parameters (form-urlencoded) as it's more reliable
     let data;
     const params = e.parameter || {};
     
+    console.log('Checking for form data...');
+    console.log('params.name:', params.name);
+    console.log('params.email:', params.email);
+    console.log('params.message:', params.message);
+    console.log('params.fileName:', params.fileName);
+    console.log('params.fileData length:', params.fileData ? params.fileData.length : 0);
+    
     // Check if we have URL parameters (form-urlencoded submission)
     if (params.name || params.email || params.message) {
+      console.log('Using form-urlencoded data from parameters');
       // Data came as URL parameters (form-urlencoded)
       data = {
         timestamp: params.timestamp || new Date(),
@@ -70,37 +91,49 @@ function doPost(e) {
         fileData: params.fileData || ''
       };
     } else if (e.postData && e.postData.type === 'application/json') {
+      console.log('Using JSON data from postData');
       // Handle JSON data from fetch API
       try {
         data = JSON.parse(e.postData.contents);
       } catch (parseError) {
         console.error('Error parsing JSON:', parseError);
-        throw new Error('Invalid JSON data received');
+        return ContentService.createTextOutput(JSON.stringify({
+          status: 'error',
+          message: 'Invalid JSON data received'
+        })).setMimeType(ContentService.MimeType.JSON);
       }
     } else {
       // No data received
-      throw new Error('No form data received');
+      console.error('ERROR: No form data received');
+      console.log('params:', params);
+      console.log('postData:', e.postData);
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'No form data received. Check parameters and postData.',
+        hasParams: !!params,
+        hasPostData: !!e.postData
+      })).setMimeType(ContentService.MimeType.JSON);
     }
     
     // Log for debugging (check View > Logs in Apps Script)
     console.log('=== Data Processing ===');
-    console.log('Event received. postData exists:', !!e.postData);
-    console.log('Event postData type:', e.postData ? e.postData.type : 'N/A');
-    console.log('Event parameters:', Object.keys(e.parameter || {}));
-    console.log('All parameters:', e.parameter);
-    console.log('Received data object:', {
-      timestamp: data.timestamp,
+    console.log('Received data:', {
       name: data.name,
       email: data.email,
       phone: data.phone,
-      message: data.message,
+      message: data.message ? data.message.substring(0, 50) + '...' : '',
       hasFile: !!(data.fileData && data.fileName),
-      fileName: data.fileName
+      fileName: data.fileName,
+      fileDataLength: data.fileData ? data.fileData.length : 0
     });
     
     // Validate we have at least name or email
     if (!data.name && !data.email) {
-      throw new Error('No name or email provided in form data');
+      console.error('ERROR: No name or email provided');
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'No name or email provided in form data'
+      })).setMimeType(ContentService.MimeType.JSON);
     }
     
     // Handle file upload if present
@@ -146,10 +179,14 @@ function doPost(e) {
     try {
       const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
       sheet = spreadsheet.getActiveSheet();
-      console.log('Spreadsheet opened successfully. Sheet name:', sheet.getName());
+      console.log('✅ Spreadsheet opened successfully. Sheet name:', sheet.getName());
+      console.log('Current last row:', sheet.getLastRow());
     } catch (sheetError) {
-      console.error('ERROR opening spreadsheet:', sheetError.toString());
-      throw new Error('Failed to open spreadsheet. Check that SPREADSHEET_ID is correct and the sheet is accessible. Error: ' + sheetError.toString());
+      console.error('❌ ERROR opening spreadsheet:', sheetError.toString());
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'Failed to open spreadsheet: ' + sheetError.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
     }
     
     // Prepare row data (adjust column order to match your sheet headers)
@@ -164,31 +201,38 @@ function doPost(e) {
     ];
     
     console.log('=== Adding Row to Sheet ===');
-    console.log('Row data to append:', rowData);
-    console.log('Current last row before append:', sheet.getLastRow());
+    console.log('Row data:', [rowData[0], rowData[1], rowData[2], rowData[3], rowData[4] ? rowData[4].substring(0, 30) + '...' : '', rowData[5], rowData[6] ? 'File URL present' : 'No file']);
     
     // Append the row to the sheet
     try {
       sheet.appendRow(rowData);
       const newLastRow = sheet.getLastRow();
       console.log('✅ Row added successfully! New last row:', newLastRow);
-      console.log('Verifying data in row:', sheet.getRange(newLastRow, 1, 1, 7).getValues());
+      const savedData = sheet.getRange(newLastRow, 1, 1, 7).getValues()[0];
+      console.log('✅ Verified saved data in row', newLastRow);
     } catch (appendError) {
-      console.error('ERROR appending row:', appendError.toString());
-      throw new Error('Failed to append row to sheet. Error: ' + appendError.toString());
+      console.error('❌ ERROR appending row:', appendError.toString());
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'Failed to append row: ' + appendError.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
     }
     
-    // Return success response with CORS headers
+    console.log('=== doPost COMPLETED SUCCESSFULLY ===');
+    console.log('Returning success response');
+    
+    // Return success response
     return ContentService
       .createTextOutput(JSON.stringify({
         'status': 'success',
         'message': 'Data stored successfully',
-        'fileUrl': fileUrl
+        'fileUrl': fileUrl,
+        'fileName': fileName
       }))
       .setMimeType(ContentService.MimeType.JSON);
       
   } catch (error) {
-    console.error('=== ERROR IN doPost ===');
+    console.error('=== FATAL ERROR IN doPost ===');
     console.error('Error type:', typeof error);
     console.error('Error message:', error.toString());
     console.error('Error stack:', error.stack);
@@ -226,9 +270,15 @@ function getOrCreateFolder(folderName) {
  * Handle GET request (for testing)
  */
 function doGet(e) {
+  console.log('=== doGet called ===');
+  console.log('This is a test - endpoint is working');
   return ContentService
-    .createTextOutput('Form submission endpoint is ready. Use POST method to submit data.')
-    .setMimeType(ContentService.MimeType.TEXT);
+    .createTextOutput(JSON.stringify({
+      status: 'ready',
+      message: 'Form submission endpoint is ready. Use POST method to submit data.',
+      timestamp: new Date().toISOString()
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
