@@ -82,6 +82,11 @@ function deleteFile(e) {
 
 /************ SUBMIT FORM ************/
 function submitForm(e) {
+  console.log('=== submitForm called ===');
+  console.log('Has postData:', !!e.postData);
+  console.log('postData type:', e.postData ? e.postData.type : 'N/A');
+  console.log('Parameters:', Object.keys(e.parameter || {}));
+  
   const sheet = SpreadsheetApp
     .openById(SPREADSHEET_ID)
     .getActiveSheet();
@@ -90,6 +95,7 @@ function submitForm(e) {
   let data;
   if (e.postData && e.postData.type === 'application/json') {
     data = JSON.parse(e.postData.contents);
+    console.log('Parsed JSON data');
   } else {
     // Form-urlencoded data (from URL parameters)
     data = {
@@ -103,6 +109,11 @@ function submitForm(e) {
       fileData: e.parameter.fileData || '',
       fileUrl: e.parameter.fileUrl || ''
     };
+    console.log('Using form-urlencoded data');
+    console.log('File name:', data.fileName);
+    console.log('File type:', data.fileType);
+    console.log('Has fileData:', !!(data.fileData && data.fileData.length > 0));
+    console.log('FileData length:', data.fileData ? data.fileData.length : 0);
   }
 
   // Handle file upload if file data is included in form submission
@@ -110,24 +121,50 @@ function submitForm(e) {
   let fileName = data.fileName || '';
   
   if (data.fileData && data.fileName && !data.fileUrl) {
+    console.log('=== Attempting file upload ===');
+    console.log('File name:', data.fileName);
+    console.log('File type:', data.fileType);
+    console.log('File data length:', data.fileData.length);
+    
     try {
       // Upload file to Drive
       const folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
+      console.log('Folder obtained:', folder.getName());
+      
+      // Decode base64
+      const decodedData = Utilities.base64Decode(data.fileData);
+      console.log('Base64 decoded, size:', decodedData.length);
+      
       const blob = Utilities.newBlob(
-        Utilities.base64Decode(data.fileData),
+        decodedData,
         data.fileType || 'application/octet-stream',
         data.fileName
       );
+      console.log('Blob created');
+      
       const file = folder.createFile(blob);
+      console.log('File created in Drive:', file.getName());
+      
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       fileUrl = file.getUrl();
       fileName = file.getName();
+      console.log('File URL:', fileUrl);
+      console.log('✅ File uploaded successfully');
     } catch (fileError) {
-      console.error('Error uploading file in form submission:', fileError);
-      fileName = data.fileName + ' (upload failed)';
+      console.error('❌ Error uploading file:', fileError.toString());
+      console.error('Error stack:', fileError.stack);
+      fileName = data.fileName + ' (upload failed: ' + fileError.toString() + ')';
     }
+  } else {
+    console.log('No file data to upload');
+    if (!data.fileData) console.log('Reason: fileData is empty');
+    if (!data.fileName) console.log('Reason: fileName is empty');
+    if (data.fileUrl) console.log('Reason: fileUrl already exists');
   }
 
+  console.log('=== Adding row to sheet ===');
+  console.log('Row data:', [new Date(), data.name, data.email, data.phone, data.message, fileName, fileUrl]);
+  
   sheet.appendRow([
     new Date(),
     data.name || '',
@@ -138,7 +175,8 @@ function submitForm(e) {
     fileUrl
   ]);
 
-  return json({ success: true });
+  console.log('✅ Row added to sheet');
+  return json({ success: true, fileUrl: fileUrl, fileName: fileName });
 }
 
 /************ HELPER ************/
