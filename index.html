@@ -296,7 +296,7 @@
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
         // See google-apps-script-code.gs file for setup instructions
         // Get this from: Google Apps Script > Deploy > Manage deployments > Copy URL
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyoVC34qje_6A3RMi9QGJKf2-xY-awMW7YWOfsc7fuVTifjp1IhsfqUyiqyX1c92Tq2/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfe4594F9zensMd7h03-EJiO7y3Qqc1M1ry-HT9oPh1FDYEIEOEqdlbT6Gl8PX5EV3Eg/exec';
         
         // Debug mode - set to true to see detailed logs in console (F12)
         const DEBUG_MODE = true;
@@ -311,34 +311,6 @@
         const filePreviewImage = document.getElementById('file-preview-image');
         const fileName = document.getElementById('file-name');
         const removeFileBtn = document.getElementById('remove-file');
-        let uploadedFile = null; // Track uploaded file for deletion
-
-        /******** IMAGE COMPRESSION ********/
-        async function compressImage(file) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                const reader = new FileReader();
-
-                reader.onload = () => img.src = reader.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    // Scale down if image is larger than 1280px width
-                    const scale = Math.min(1, 1280 / img.width);
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    // Convert to JPEG with 0.7 quality (good balance between size and quality)
-                    canvas.toBlob(
-                        (blob) => resolve(new File([blob], file.name, { type: 'image/jpeg' })),
-                        'image/jpeg',
-                        0.7
-                    );
-                };
-                reader.readAsDataURL(file);
-            });
-        }
 
         // Handle file preview
         fileUpload.addEventListener('change', (e) => {
@@ -371,88 +343,11 @@
             }
         });
 
-        /******** UPLOAD FILE WITH PROGRESS ********/
-        function uploadFileWithProgress(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                
-                reader.onload = () => {
-                    const formData = new URLSearchParams();
-                    formData.append('action', 'upload');
-                    formData.append('file', reader.result.split(',')[1]); // Base64 data without prefix
-                    formData.append('fileName', file.name);
-                    formData.append('mimeType', file.type);
-
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', GOOGLE_SCRIPT_URL);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-                    xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable) {
-                            const percentComplete = Math.round((e.loaded / e.total) * 100);
-                            submitText.textContent = `ಅಪ್ಲೋಡ್ ${percentComplete}%`;
-                        }
-                    };
-
-                    xhr.onload = () => {
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                resolve(response);
-                            } else {
-                                reject(new Error(response.error || 'Upload failed'));
-                            }
-                        } catch (parseError) {
-                            reject(new Error('Failed to parse upload response'));
-                        }
-                    };
-
-                    xhr.onerror = () => reject(new Error('Upload request failed'));
-                    xhr.send(formData.toString());
-                };
-
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsDataURL(file);
-            });
-        }
-
-        /******** DELETE UPLOADED FILE ********/
-        async function deleteUploadedFile() {
-            if (!uploadedFile || !uploadedFile.fileId) return;
-            
-            if (!confirm('ಈ ಫೈಲ್ ಅಳಿಸಲು ಖಚಿತವೇ?')) return;
-
-            try {
-                const formData = new URLSearchParams();
-                formData.append('action', 'delete');
-                formData.append('fileId', uploadedFile.fileId);
-
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData.toString()
-                });
-
-                uploadedFile = null;
-                fileUpload.value = '';
-                filePreview.classList.add('hidden');
-                filePreviewImage.style.display = '';
-                showMessage('ಫೈಲ್ ಅಳಿಸಲಾಗಿದೆ ✅', 'success');
-            } catch (error) {
-                console.error('Delete error:', error);
-                showMessage('ಫೈಲ್ ಅಳಿಸುವಲ್ಲಿ ದೋಷ', 'error');
-            }
-        }
-
         // Handle file removal
-        removeFileBtn.addEventListener('click', async () => {
-            if (uploadedFile && uploadedFile.fileId) {
-                await deleteUploadedFile();
-            } else {
-                fileUpload.value = '';
-                filePreview.classList.add('hidden');
-                filePreviewImage.style.display = '';
-            }
+        removeFileBtn.addEventListener('click', () => {
+            fileUpload.value = '';
+            filePreview.classList.add('hidden');
+            filePreviewImage.style.display = '';
         });
 
         form.addEventListener('submit', async (e) => {
@@ -484,35 +379,25 @@
                 // Handle file upload if present
                 const fileInput = fileUpload.files[0];
                 if (fileInput) {
-                    try {
-                        // Compress image if it's an image file
-                        let fileToUpload = fileInput;
-                        if (fileInput.type.startsWith('image/')) {
-                            submitText.textContent = 'ಚಿತ್ರವನ್ನು ಸಂಕುಚಿಸಲಾಗುತ್ತಿದೆ...';
-                            fileToUpload = await compressImage(fileInput);
-                            const originalSize = (fileInput.size / 1024 / 1024).toFixed(2);
-                            const compressedSize = (fileToUpload.size / 1024 / 1024).toFixed(2);
-                            console.log(`Image compressed: ${originalSize}MB → ${compressedSize}MB`);
-                        }
+                    // Convert file to base64
+                    const reader = new FileReader();
+                    reader.onloadend = async function() {
+                        const base64String = reader.result.split(',')[1]; // Remove data URL prefix
+                        data.fileName = fileInput.name;
+                        data.fileType = fileInput.type;
+                        data.fileSize = fileInput.size;
+                        data.fileData = base64String;
 
-                        // Upload file first with progress tracking
-                        submitText.textContent = 'ಫೈಲ್ ಅಪ್ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ...';
-                        uploadedFile = await uploadFileWithProgress(fileToUpload);
-                        
-                        // Add file info to form data
-                        data.fileName = uploadedFile.fileName;
-                        data.fileUrl = uploadedFile.fileUrl;
-                        data.fileId = uploadedFile.fileId;
-
-                        // Submit form data
+                        // Submit to Google Apps Script
                         await submitData(data);
-                    } catch (uploadError) {
-                        console.error('File upload error:', uploadError);
-                        showMessage('ಫೈಲ್ ಅಪ್ಲೋಡ್ ಮಾಡುವಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', 'error');
+                    };
+                    reader.onerror = () => {
+                        showMessage('ಫೈಲ್ ಓದುವಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', 'error');
                         submitButton.disabled = false;
                         submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
                         submitSpinner.classList.add('hidden');
-                    }
+                    };
+                    reader.readAsDataURL(fileInput);
                 } else {
                     // No file, submit directly
                     await submitData(data);
@@ -549,17 +434,41 @@
                     
                     // Convert data to URL-encoded format (more reliable with Google Apps Script)
                     const formData = new URLSearchParams();
-                    formData.append('action', 'submit');
                     formData.append('timestamp', data.timestamp || new Date().toISOString());
                     formData.append('name', data.name || '');
                     formData.append('email', data.email || '');
                     formData.append('phone', data.phone || '');
                     formData.append('message', data.message || '');
                     
-                    // Add file info if file was uploaded
-                    if (data.fileName) {
-                        formData.append('fileName', data.fileName);
-                        formData.append('fileUrl', data.fileUrl || '');
+                    // Add file data if present (for large files, we'll send as JSON separately)
+                    if (data.fileData && data.fileName) {
+                        // If file is small (< 1MB), send as URL param, otherwise warn
+                        if (data.fileSize < 1024 * 1024) {
+                            formData.append('fileName', data.fileName);
+                            formData.append('fileType', data.fileType || '');
+                            formData.append('fileData', data.fileData);
+                        } else {
+                            console.warn('File is too large for URL encoding. Using JSON method.');
+                            // Fall back to JSON for large files
+                            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data)
+                            });
+                            setTimeout(() => {
+                                showMessage('ಫಾರ್ಮ್ ಸಲ್ಲಿಸಲಾಗಿದೆ! ✅ ಪರಿಶೀಲಿಸಲು ನಿಮ್ಮ Google Sheet ಅನ್ನು ಪರಿಶೀಲಿಸಿ.', 'success');
+                                document.getElementById('feedback-form').reset();
+                                filePreview.classList.add('hidden');
+                                filePreviewImage.style.display = '';
+                                submitButton.disabled = false;
+                                submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
+                                submitSpinner.classList.add('hidden');
+                            }, 1000);
+                            return;
+                        }
                     }
                     
                     // Submit using URL-encoded format (works better with Google Apps Script)
@@ -586,7 +495,6 @@
                         document.getElementById('feedback-form').reset();
                         filePreview.classList.add('hidden');
                         filePreviewImage.style.display = '';
-                        uploadedFile = null; // Reset uploaded file
                         submitButton.disabled = false;
                         submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
                         submitSpinner.classList.add('hidden');

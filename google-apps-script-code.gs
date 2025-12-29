@@ -30,97 +30,178 @@ const SPREADSHEET_ID = '1bhJZNV_WipJ7J4dk5nDus-y7hxk-cCAE0DO7UtXDMBo';
 // If not set, files will be stored in the root of your Drive
 const DRIVE_FOLDER_NAME = 'Birthday';
 
-/************ ROUTER ************/
+/**
+ * Handle POST request from the form
+ */
 function doPost(e) {
+  // Start logging immediately
+  console.log('=== doPost called ===');
+  console.log('Event exists:', !!e);
+  console.log('SPREADSHEET_ID:', SPREADSHEET_ID);
+  
   try {
-    const action = e.parameter.action;
-
-    if (action === 'upload') return uploadFile(e);
-    if (action === 'submit') return submitForm(e);
-    if (action === 'delete') return deleteFile(e);
-
-    return json({ success: false, error: 'Invalid action' });
-  } catch (err) {
-    return json({ success: false, error: err.message });
+    // Check if event parameter exists
+    if (!e) {
+      console.error('ERROR: Event parameter is missing');
+      throw new Error('Event parameter is missing. This function should be called as a web app.');
+    }
+    
+    // Check if SPREADSHEET_ID is configured
+    if (SPREADSHEET_ID === 'YOUR_SPREADSHEET_ID_HERE' || !SPREADSHEET_ID || SPREADSHEET_ID.trim() === '') {
+      console.error('ERROR: SPREADSHEET_ID is not configured');
+      throw new Error('SPREADSHEET_ID is not configured. Please update it in the script.');
+    }
+    
+    // Get form data - prioritize URL parameters (form-urlencoded) as it's more reliable
+    let data;
+    const params = e.parameter || {};
+    
+    // Check if we have URL parameters (form-urlencoded submission)
+    if (params.name || params.email || params.message) {
+      // Data came as URL parameters (form-urlencoded)
+      data = {
+        timestamp: params.timestamp || new Date(),
+        name: params.name || '',
+        email: params.email || '',
+        phone: params.phone || '',
+        message: params.message || '',
+        fileName: params.fileName || '',
+        fileType: params.fileType || '',
+        fileData: params.fileData || ''
+      };
+    } else if (e.postData && e.postData.type === 'application/json') {
+      // Handle JSON data from fetch API
+      try {
+        data = JSON.parse(e.postData.contents);
+      } catch (parseError) {
+        console.error('Error parsing JSON:', parseError);
+        throw new Error('Invalid JSON data received');
+      }
+    } else {
+      // No data received
+      throw new Error('No form data received');
+    }
+    
+    // Log for debugging (check View > Logs in Apps Script)
+    console.log('=== Data Processing ===');
+    console.log('Event received. postData exists:', !!e.postData);
+    console.log('Event postData type:', e.postData ? e.postData.type : 'N/A');
+    console.log('Event parameters:', Object.keys(e.parameter || {}));
+    console.log('All parameters:', e.parameter);
+    console.log('Received data object:', {
+      timestamp: data.timestamp,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      message: data.message,
+      hasFile: !!(data.fileData && data.fileName),
+      fileName: data.fileName
+    });
+    
+    // Validate we have at least name or email
+    if (!data.name && !data.email) {
+      throw new Error('No name or email provided in form data');
+    }
+    
+    // Handle file upload if present
+    let fileUrl = '';
+    let fileName = '';
+    
+    if (data.fileData && data.fileName) {
+      try {
+        console.log('Processing file upload:', data.fileName);
+        // Get or create the folder for uploads
+        let folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
+        
+        // Decode base64 file data
+        const fileBlob = Utilities.newBlob(
+          Utilities.base64Decode(data.fileData),
+          data.fileType || 'application/octet-stream',
+          data.fileName
+        );
+        
+        // Create file in Google Drive
+        const file = folder.createFile(fileBlob);
+        
+        // Set file permissions to make it accessible
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        
+        // Get file URL
+        fileUrl = file.getUrl();
+        fileName = data.fileName;
+        console.log('File uploaded successfully:', fileUrl);
+        
+      } catch (fileError) {
+        console.error('Error uploading file:', fileError.toString());
+        // Continue with form submission even if file upload fails
+        fileName = data.fileName + ' (upload failed: ' + fileError.toString() + ')';
+      }
+    }
+    
+    // Open the spreadsheet
+    console.log('=== Opening Spreadsheet ===');
+    console.log('Attempting to open spreadsheet with ID:', SPREADSHEET_ID);
+    
+    let sheet;
+    try {
+      const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+      sheet = spreadsheet.getActiveSheet();
+      console.log('Spreadsheet opened successfully. Sheet name:', sheet.getName());
+    } catch (sheetError) {
+      console.error('ERROR opening spreadsheet:', sheetError.toString());
+      throw new Error('Failed to open spreadsheet. Check that SPREADSHEET_ID is correct and the sheet is accessible. Error: ' + sheetError.toString());
+    }
+    
+    // Prepare row data (adjust column order to match your sheet headers)
+    const rowData = [
+      data.timestamp || new Date(),
+      data.name || '',
+      data.email || '',
+      data.phone || '',
+      data.message || '',
+      fileName || '',
+      fileUrl || ''
+    ];
+    
+    console.log('=== Adding Row to Sheet ===');
+    console.log('Row data to append:', rowData);
+    console.log('Current last row before append:', sheet.getLastRow());
+    
+    // Append the row to the sheet
+    try {
+      sheet.appendRow(rowData);
+      const newLastRow = sheet.getLastRow();
+      console.log('✅ Row added successfully! New last row:', newLastRow);
+      console.log('Verifying data in row:', sheet.getRange(newLastRow, 1, 1, 7).getValues());
+    } catch (appendError) {
+      console.error('ERROR appending row:', appendError.toString());
+      throw new Error('Failed to append row to sheet. Error: ' + appendError.toString());
+    }
+    
+    // Return success response with CORS headers
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        'status': 'success',
+        'message': 'Data stored successfully',
+        'fileUrl': fileUrl
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    console.error('=== ERROR IN doPost ===');
+    console.error('Error type:', typeof error);
+    console.error('Error message:', error.toString());
+    console.error('Error stack:', error.stack);
+    
+    // Return error response
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        'status': 'error',
+        'message': error.toString(),
+        'errorType': typeof error
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-/************ UPLOAD FILE ************/
-function uploadFile(e) {
-  if (!e.parameter.file) throw new Error('No file received');
-
-  const folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
-
-  const blob = Utilities.newBlob(
-    Utilities.base64Decode(e.parameter.file),
-    e.parameter.mimeType,
-    e.parameter.fileName
-  );
-
-  const file = folder.createFile(blob);
-  file.setSharing(
-    DriveApp.Access.ANYONE_WITH_LINK,
-    DriveApp.Permission.VIEW
-  );
-
-  return json({
-    success: true,
-    fileId: file.getId(),
-    fileName: file.getName(),
-    fileUrl: file.getUrl()
-  });
-}
-
-/************ DELETE FILE ************/
-function deleteFile(e) {
-  const fileId = e.parameter.fileId;
-  if (!fileId) throw new Error('No fileId');
-
-  DriveApp.getFileById(fileId).setTrashed(true);
-  return json({ success: true });
-}
-
-/************ SUBMIT FORM ************/
-function submitForm(e) {
-  const sheet = SpreadsheetApp
-    .openById(SPREADSHEET_ID)
-    .getActiveSheet();
-
-  // Handle both form-urlencoded and JSON data
-  let data;
-  if (e.postData && e.postData.type === 'application/json') {
-    data = JSON.parse(e.postData.contents);
-  } else {
-    // Form-urlencoded data (from URL parameters)
-    data = {
-      timestamp: e.parameter.timestamp || new Date(),
-      name: e.parameter.name || '',
-      email: e.parameter.email || '',
-      phone: e.parameter.phone || '',
-      message: e.parameter.message || '',
-      fileName: e.parameter.fileName || '',
-      fileUrl: e.parameter.fileUrl || ''
-    };
-  }
-
-  sheet.appendRow([
-    new Date(),
-    data.name || '',
-    data.email || '',
-    data.phone || '',
-    data.message || '',
-    data.fileName || '',
-    data.fileUrl || ''
-  ]);
-
-  return json({ success: true });
-}
-
-/************ HELPER ************/
-function json(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
