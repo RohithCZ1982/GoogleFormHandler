@@ -71,20 +71,17 @@ function doPost(e) {
     
     console.log('Checking for form data...');
     console.log('params.name:', params.name);
-    console.log('params.email:', params.email);
     console.log('params.message:', params.message);
     console.log('params.fileName:', params.fileName);
     console.log('params.fileData length:', params.fileData ? params.fileData.length : 0);
     
     // Check if we have URL parameters (form-urlencoded submission)
-    if (params.name || params.email || params.message) {
+    if (params.name || params.message) {
       console.log('Using form-urlencoded data from parameters');
       // Data came as URL parameters (form-urlencoded)
       data = {
         timestamp: params.timestamp || new Date(),
         name: params.name || '',
-        email: params.email || '',
-        phone: params.phone || '',
         message: params.message || '',
         fileName: params.fileName || '',
         fileType: params.fileType || '',
@@ -119,20 +116,18 @@ function doPost(e) {
     console.log('=== Data Processing ===');
     console.log('Received data:', {
       name: data.name,
-      email: data.email,
-      phone: data.phone,
       message: data.message ? data.message.substring(0, 50) + '...' : '',
       hasFile: !!(data.fileData && data.fileName),
       fileName: data.fileName,
       fileDataLength: data.fileData ? data.fileData.length : 0
     });
     
-    // Validate we have at least name or email
-    if (!data.name && !data.email) {
-      console.error('ERROR: No name or email provided');
+    // Validate we have name
+    if (!data.name || data.name.trim() === '') {
+      console.error('ERROR: No name provided');
       return ContentService.createTextOutput(JSON.stringify({
         status: 'error',
-        message: 'No name or email provided in form data'
+        message: 'Name is required'
       })).setMimeType(ContentService.MimeType.JSON);
     }
     
@@ -193,15 +188,13 @@ function doPost(e) {
     const rowData = [
       data.timestamp || new Date(),
       data.name || '',
-      data.email || '',
-      data.phone || '',
       data.message || '',
       fileName || '',
       fileUrl || ''
     ];
     
     console.log('=== Adding Row to Sheet ===');
-    console.log('Row data:', [rowData[0], rowData[1], rowData[2], rowData[3], rowData[4] ? rowData[4].substring(0, 30) + '...' : '', rowData[5], rowData[6] ? 'File URL present' : 'No file']);
+    console.log('Row data:', [rowData[0], rowData[1], rowData[2] ? rowData[2].substring(0, 30) + '...' : '', rowData[3], rowData[4] ? 'File URL present' : 'No file']);
     
     // Append the row to the sheet
     try {
