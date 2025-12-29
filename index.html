@@ -288,18 +288,27 @@
                 <p>ಹಾಗು ಕೈವಲ್ಯ ಮಿತ್ರ</p>
                 <p class="mt-2">'ಸಾರಂಗ' ವಿನಾಯಕ ನಗರ, ತಿಪಟೂರು</p>
                 <p class="mt-2 text-emerald-600 font-medium">9845578415, 8147292442</p>
+                <p class="mt-3 text-gray-400 text-xs">Version 1.0.0</p>
             </div>
         </div>
     </div>
 
     <script>
+        // Application version
+        const APP_VERSION = '1.0.0';
+        
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
         // See google-apps-script-code.gs file for setup instructions
         // Get this from: Google Apps Script > Deploy > Manage deployments > Copy URL
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxfe4594F9zensMd7h03-EJiO7y3Qqc1M1ry-HT9oPh1FDYEIEOEqdlbT6Gl8PX5EV3Eg/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyoVC34qje_6A3RMi9QGJKf2-xY-awMW7YWOfsc7fuVTifjp1IhsfqUyiqyX1c92Tq2/exec';
         
         // Debug mode - set to true to see detailed logs in console (F12)
         const DEBUG_MODE = true;
+        
+        // Log version on load
+        if (DEBUG_MODE) {
+            console.log('Application Version:', APP_VERSION);
+        }
 
         const form = document.getElementById('feedback-form');
         const submitButton = document.getElementById('submit-button');
