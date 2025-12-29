@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="kn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ಉಗ್ರರಥ</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ಉಗ್ರರಥ</title>
+    
     <!-- Load Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Load Kannada and Inter fonts -->
     <style>
@@ -261,8 +261,8 @@
                         </button>
                     </div>
                     <p id="file-name" class="mt-2 text-xs sm:text-sm text-gray-600"></p>
-  </div>
-</div>
+                </div>
+            </div>
 
             <!-- Submit Button -->
             <button 
@@ -274,7 +274,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-</button>
+            </button>
 
             <!-- Success/Error Messages -->
             <div id="form-message" class="hidden mt-4 p-3 sm:p-4 rounded-lg text-sm sm:text-base"></div>
@@ -290,9 +290,9 @@
                 <p class="mt-2 text-emerald-600 font-medium">9845578415, 8147292442</p>
             </div>
         </div>
-</div>
+    </div>
 
-<script>
+    <script>
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
         // See google-apps-script-code.gs file for setup instructions
         // Get this from: Google Apps Script > Deploy > Manage deployments > Copy URL
@@ -313,16 +313,16 @@
         const removeFileBtn = document.getElementById('remove-file');
         let uploadedFile = null; // Track uploaded file for deletion
 
-/******** IMAGE COMPRESSION ********/
-async function compressImage(file) {
+        /******** IMAGE COMPRESSION ********/
+        async function compressImage(file) {
             return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
+                const img = new Image();
+                const reader = new FileReader();
 
-    reader.onload = () => img.src = reader.result;
+                reader.onload = () => img.src = reader.result;
                 img.onerror = () => reject(new Error('Failed to load image for compression'));
                 
-    img.onload = () => {
+                img.onload = () => {
                     const canvas = document.createElement('canvas');
                     // Scale down if image is larger than 1280px width (or height)
                     const maxDimension = 1280;
@@ -353,14 +353,9 @@ async function compressImage(file) {
                     canvas.toBlob(
                         (blob) => {
                             if (blob) {
-                                // Preserve original filename but change extension to .jpg
-                                const originalName = file.name;
-                                const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
-                                const compressedFileName = nameWithoutExt + '.jpg';
-                                const compressedFile = new File([blob], compressedFileName, { type: 'image/jpeg' });
+                                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), { type: 'image/jpeg' });
                                 const compressionRatio = ((1 - compressedFile.size / file.size) * 100).toFixed(1);
                                 console.log(`Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB (${compressionRatio}% reduction)`);
-                                console.log(`Filename: ${originalName} → ${compressedFileName}`);
                                 resolve(compressedFile);
                             } else {
                                 reject(new Error('Failed to compress image'));
@@ -371,9 +366,9 @@ async function compressImage(file) {
                     );
                 };
                 reader.onerror = () => reject(new Error('Failed to read image file'));
-    reader.readAsDataURL(file);
-  });
-}
+                reader.readAsDataURL(file);
+            });
+        }
 
         // Handle file preview
         fileUpload.addEventListener('change', (e) => {
@@ -408,7 +403,7 @@ async function compressImage(file) {
 
         /******** UPLOAD FILE WITH PROGRESS (CORS-Safe) ********/
         function uploadFileWithProgress(file) {
-  return new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 // Check file size before processing (Google Apps Script has ~50MB limit, but base64 increases size by ~33%)
                 const maxFileSize = 35 * 1024 * 1024; // 35MB (will be ~47MB base64 encoded)
                 if (file.size > maxFileSize) {
@@ -416,7 +411,7 @@ async function compressImage(file) {
                     return;
                 }
 
-    const reader = new FileReader();
+                const reader = new FileReader();
                 
                 reader.onload = async () => {
                     const base64Data = reader.result.split(',')[1]; // Base64 data without prefix
@@ -484,15 +479,15 @@ async function compressImage(file) {
                 };
 
                 reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsDataURL(file);
-  });
-}
+                reader.readAsDataURL(file);
+            });
+        }
 
         /******** DELETE UPLOADED FILE ********/
         async function deleteUploadedFile() {
             if (!uploadedFile || !uploadedFile.fileId) return;
             
-  if (!confirm('ಈ ಫೈಲ್ ಅಳಿಸಲು ಖಚಿತವೇ?')) return;
+            if (!confirm('ಈ ಫೈಲ್ ಅಳಿಸಲು ಖಚಿತವೇ?')) return;
 
             try {
                 const formData = new URLSearchParams();
@@ -505,7 +500,7 @@ async function compressImage(file) {
                     body: formData.toString()
                 });
 
-  uploadedFile = null;
+                uploadedFile = null;
                 fileUpload.value = '';
                 filePreview.classList.add('hidden');
                 filePreviewImage.style.display = '';
@@ -573,7 +568,6 @@ async function compressImage(file) {
                             submitText.textContent = 'ಚಿತ್ರವನ್ನು ಸಂಕುಚಿಸಲಾಗುತ್ತಿದೆ...';
                             try {
                                 fileToUpload = await compressImage(fileInput);
-                                console.log('Image compressed:', fileInput.name, '→', fileToUpload.name);
                             } catch (compressError) {
                                 console.warn('Compression failed, using original:', compressError);
                                 // Continue with original file if compression fails
@@ -586,15 +580,8 @@ async function compressImage(file) {
                         submitText.textContent = 'ಫೈಲ್ ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ...';
                         const fileBase64 = await new Promise((resolve, reject) => {
                             const reader = new FileReader();
-                            reader.onload = () => {
-                                const base64 = reader.result.split(',')[1];
-                                console.log('File read successfully, base64 length:', base64.length);
-                                resolve(base64);
-                            };
-                            reader.onerror = () => {
-                                console.error('FileReader error');
-                                reject(new Error('Failed to read file'));
-                            };
+                            reader.onload = () => resolve(reader.result.split(',')[1]);
+                            reader.onerror = () => reject(new Error('Failed to read file'));
                             reader.readAsDataURL(fileToUpload);
                         });
 
@@ -602,13 +589,6 @@ async function compressImage(file) {
                         data.fileName = fileToUpload.name;
                         data.fileType = fileToUpload.type;
                         data.fileData = fileBase64;
-                        
-                        if (DEBUG_MODE) {
-                            console.log('File prepared for upload:');
-                            console.log('- Name:', data.fileName);
-                            console.log('- Type:', data.fileType);
-                            console.log('- Base64 size:', (fileBase64.length / 1024 / 1024).toFixed(2), 'MB');
-                        }
 
                         // Submit form data with file included
                         await submitData(data);
@@ -665,27 +645,6 @@ async function compressImage(file) {
                     
                     // Add file data if present (file will be uploaded during form submission)
                     if (data.fileData && data.fileName) {
-                        // Check if file data is too large for URL encoding (Google Apps Script has ~50MB limit)
-                        // Base64 increases size by ~33%, so we need to be careful
-                        const fileDataSize = data.fileData.length;
-                        const maxSize = 40 * 1024 * 1024; // 40MB base64 (safe limit)
-                        
-                        if (fileDataSize > maxSize) {
-                            console.error('File data too large for URL encoding:', (fileDataSize / 1024 / 1024).toFixed(2), 'MB');
-                            showMessage('ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.', 'error');
-                            submitButton.disabled = false;
-                            submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
-                            submitSpinner.classList.add('hidden');
-                            return;
-                        }
-                        
-                        if (DEBUG_MODE) {
-                            console.log('Adding file data to form:');
-                            console.log('- File name:', data.fileName);
-                            console.log('- File type:', data.fileType);
-                            console.log('- File data size:', (fileDataSize / 1024 / 1024).toFixed(2), 'MB');
-                        }
-                        
                         formData.append('fileName', data.fileName);
                         formData.append('fileType', data.fileType || '');
                         formData.append('fileData', data.fileData);
@@ -693,17 +652,6 @@ async function compressImage(file) {
                         // File was uploaded separately, just include the reference
                         formData.append('fileName', data.fileName);
                         formData.append('fileUrl', data.fileUrl || '');
-                    } else {
-                        if (DEBUG_MODE) {
-                            console.log('No file data to include in form submission');
-                        }
-                    }
-                    
-                    // Check total payload size
-                    const payloadSize = formData.toString().length;
-                    if (DEBUG_MODE) {
-                        console.log('Total payload size:', (payloadSize / 1024 / 1024).toFixed(2), 'MB');
-                        console.log('Form data keys:', Array.from(formData.keys()));
                     }
                     
                     // Submit using URL-encoded format with no-cors mode to avoid CORS preflight
@@ -718,12 +666,10 @@ async function compressImage(file) {
                     
                     if (DEBUG_MODE) {
                         console.log('Request sent using URL-encoded format');
-                        console.log('Payload size:', (payloadSize / 1024 / 1024).toFixed(2), 'MB');
                         console.log('Please check:');
                         console.log('1. Google Apps Script logs (View > Logs)');
                         console.log('2. Google Sheet for new rows');
                         console.log('3. Google Drive for uploaded files');
-                        console.log('4. If file is missing, check if payload size exceeded limits');
                     }
                     
                     // Wait a moment then show success message
