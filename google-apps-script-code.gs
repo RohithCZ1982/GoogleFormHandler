@@ -35,7 +35,6 @@ function doPost(e) {
   try {
     const action = e.parameter.action;
 
-    if (action === 'upload') return uploadFile(e);
     if (action === 'submit') return submitForm(e);
     if (action === 'delete') return deleteFile(e);
 
@@ -43,32 +42,6 @@ function doPost(e) {
   } catch (err) {
     return json({ success: false, error: err.message });
   }
-}
-
-/************ UPLOAD FILE ************/
-function uploadFile(e) {
-  if (!e.parameter.file) throw new Error('No file received');
-
-  const folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
-
-  const blob = Utilities.newBlob(
-    Utilities.base64Decode(e.parameter.file),
-    e.parameter.mimeType,
-    e.parameter.fileName
-  );
-
-  const file = folder.createFile(blob);
-  file.setSharing(
-    DriveApp.Access.ANYONE_WITH_LINK,
-    DriveApp.Permission.VIEW
-  );
-
-  return json({
-    success: true,
-    fileId: file.getId(),
-    fileName: file.getName(),
-    fileUrl: file.getUrl()
-  });
 }
 
 /************ DELETE FILE ************/
