@@ -32,28 +32,14 @@ const DRIVE_FOLDER_NAME = 'Birthday';
 
 /************ ROUTER ************/
 function doPost(e) {
-  console.log('=== doPost called ===');
-  console.log('Has parameters:', !!e.parameter);
-  console.log('Parameter keys:', Object.keys(e.parameter || {}));
-  console.log('Has postData:', !!e.postData);
-  
   try {
-    const action = e.parameter ? e.parameter.action : null;
-    console.log('Action:', action);
-
-    if (!action) {
-      console.error('No action parameter found');
-      return json({ success: false, error: 'No action parameter provided' });
-    }
+    const action = e.parameter.action;
 
     if (action === 'submit') return submitForm(e);
     if (action === 'delete') return deleteFile(e);
 
-    console.error('Invalid action:', action);
-    return json({ success: false, error: 'Invalid action: ' + action });
+    return json({ success: false, error: 'Invalid action' });
   } catch (err) {
-    console.error('Error in doPost:', err.toString());
-    console.error('Error stack:', err.stack);
     return json({ success: false, error: err.message });
   }
 }
@@ -168,14 +154,9 @@ function submitForm(e) {
 
 /************ HELPER ************/
 function json(obj) {
- return ContentService
-  .createTextOutput(JSON.stringify({
-    success: true
-  }))
-  .setMimeType(ContentService.MimeType.JSON)
-  .setHeader("Access-Control-Allow-Origin", "*")
-  .setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-  .setHeader("Access-Control-Allow-Headers", "Content-Type");
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**

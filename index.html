@@ -406,6 +406,16 @@ async function compressImage(file) {
             }
         });
 
+        /******** UPLOAD FILE WITH PROGRESS (CORS-Safe) ********/
+        function uploadFileWithProgress(file) {
+  return new Promise((resolve, reject) => {
+                // Check file size before processing (Google Apps Script has ~50MB limit, but base64 increases size by ~33%)
+                const maxFileSize = 35 * 1024 * 1024; // 35MB (will be ~47MB base64 encoded)
+                if (file.size > maxFileSize) {
+                    reject(new Error(`ಫೈಲ್ ತುಂಬಾ ದೊಡ್ಡದಾಗಿದೆ (${(file.size / 1024 / 1024).toFixed(2)}MB). ಗರಿಷ್ಠ ಗಾತ್ರ: 35MB. ದಯವಿಟ್ಟು ಸಣ್ಣ ಫೈಲ್ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ.`));
+                    return;
+                }
+
     const reader = new FileReader();
                 
                 reader.onload = async () => {
@@ -443,7 +453,7 @@ async function compressImage(file) {
                         // Note: We can't read the response with no-cors, but Google Apps Script will process it
                         const response = await fetch(GOOGLE_SCRIPT_URL, {
                             method: 'POST',
-                           
+                            mode: 'no-cors', // This avoids CORS preflight
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
@@ -697,35 +707,27 @@ async function compressImage(file) {
                     }
                     
                     // Submit using URL-encoded format with no-cors mode to avoid CORS preflight
-                    // Note: With no-cors, we can't read the response, but the request will still be sent
-                    console.log('Sending request to:', GOOGLE_SCRIPT_URL);
-                    console.log('Request body length:', formData.toString().length);
-                    console.log('Request body preview (first 500 chars):', formData.toString().substring(0, 500));
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Avoids CORS preflight - works from any origin
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData.toString()
+                    });
                     
-                    try {
-                        const response = await fetch(GOOGLE_SCRIPT_URL, {
-                            method: 'POST',
-                            mode: 'no-cors', // Avoids CORS preflight - works from any origin
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: formData.toString()
-                        });
-                        
-                        if (DEBUG_MODE) {
-                            console.log('Request sent successfully');
-                            console.log('Response type:', response.type); // Will be 'opaque' with no-cors
-                            console.log('Response status:', response.status); // Will be 0 with no-cors
-                            console.log('Payload size:', (payloadSize / 1024 / 1024).toFixed(2), 'MB');
-                            console.log('Please check:');
-                            console.log('1. Google Apps Script logs (View > Logs)');
-                            console.log('2. Google Sheet for new rows');
-                            console.log('3. Google Drive for uploaded files');
-                            console.log('4. If file is missing, check if payload size exceeded limits');
-                        }
-                        
-                        // With no-cors, we can't verify success, but show success message
-                        // The data should still be saved if the request reached the server
+                    if (DEBUG_MODE) {
+                        console.log('Request sent using URL-encoded format');
+                        console.log('Payload size:', (payloadSize / 1024 / 1024).toFixed(2), 'MB');
+                        console.log('Please check:');
+                        console.log('1. Google Apps Script logs (View > Logs)');
+                        console.log('2. Google Sheet for new rows');
+                        console.log('3. Google Drive for uploaded files');
+                        console.log('4. If file is missing, check if payload size exceeded limits');
+                    }
+                    
+                    // Wait a moment then show success message
+                    setTimeout(() => {
                         showMessage('ಫಾರ್ಮ್ ಸಲ್ಲಿಸಲಾಗಿದೆ! ✅ ಡೇಟಾ ಉಳಿಸಲಾಗಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಲು ನಿಮ್ಮ Google Sheet ಅನ್ನು ಪರಿಶೀಲಿಸಿ.', 'success');
                         document.getElementById('feedback-form').reset();
                         filePreview.classList.add('hidden');
@@ -734,11 +736,7 @@ async function compressImage(file) {
                         submitButton.disabled = false;
                         submitText.textContent = 'ಫಾರ್ಮ್ ಸಲ್ಲಿಸಿ';
                         submitSpinner.classList.add('hidden');
-                        
-                    } catch (fetchError) {
-                        console.error('Fetch error:', fetchError);
-                        throw new Error('Request failed to send. Please check your connection and try again.');
-                    }
+                    }, 1500);
                     
                 } catch (error) {
                     console.error('=== Form Submission Error ===');
