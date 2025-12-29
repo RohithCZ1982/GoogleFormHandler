@@ -99,33 +99,8 @@ function submitForm(e) {
       phone: e.parameter.phone || '',
       message: e.parameter.message || '',
       fileName: e.parameter.fileName || '',
-      fileType: e.parameter.fileType || '',
-      fileData: e.parameter.fileData || '',
       fileUrl: e.parameter.fileUrl || ''
     };
-  }
-
-  // Handle file upload if file data is included in form submission
-  let fileUrl = data.fileUrl || '';
-  let fileName = data.fileName || '';
-  
-  if (data.fileData && data.fileName && !data.fileUrl) {
-    try {
-      // Upload file to Drive
-      const folder = getOrCreateFolder(DRIVE_FOLDER_NAME);
-      const blob = Utilities.newBlob(
-        Utilities.base64Decode(data.fileData),
-        data.fileType || 'application/octet-stream',
-        data.fileName
-      );
-      const file = folder.createFile(blob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      fileUrl = file.getUrl();
-      fileName = file.getName();
-    } catch (fileError) {
-      console.error('Error uploading file in form submission:', fileError);
-      fileName = data.fileName + ' (upload failed)';
-    }
   }
 
   sheet.appendRow([
@@ -134,8 +109,8 @@ function submitForm(e) {
     data.email || '',
     data.phone || '',
     data.message || '',
-    fileName,
-    fileUrl
+    data.fileName || '',
+    data.fileUrl || ''
   ]);
 
   return json({ success: true });
