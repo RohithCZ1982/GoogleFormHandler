@@ -209,14 +209,15 @@
 
             <!-- Photo Upload Field -->
             <div>
-                <label for="photo-upload" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
-                    Photo Upload (Optional)
-                </label>
+                <button onclick="document.getElementById('photo-upload').click()">
+                    📷 Take Photo / Choose Image (Optional)
+                    </button>
                 <input 
                     type="file" 
                     id="photo-upload" 
                     name="photo-upload" 
                     accept="image/*"
+                    hidden
                     class="block w-full text-xs sm:text-sm text-gray-700
                            file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
                            file:rounded-lg file:border-0
@@ -240,14 +241,15 @@
 
             <!-- Video Upload Field -->
             <div>
-                <label for="video-upload" class="block text-sm sm:text-base font-medium text-gray-700 mb-2 kannada-text">
-                    Video Upload (Optional)
-                </label>
+                <button onclick="document.getElementById('video-upload').click()">
+                    🎥 Record / Choose Video (Optional)
+                    </button>
                 <input 
                     type="file" 
                     id="video-upload" 
                     name="video-upload" 
                     accept="video/*"
+                    hidden
                     class="block w-full text-xs sm:text-sm text-gray-700
                            file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
                            file:rounded-lg file:border-0
